@@ -16,14 +16,14 @@ export async function POST(request) {
     // 4. Génération du token d'accès (module jsonwebtoken)
     const accessToken = jwt.sign(
       { username: mockUser.username },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
+      process.env.JWT_EXPIRATION,
+      { expiresIn: process.env.JWT_EXPIRATION }
     );
     // 5. Génération du refresh token (module jsonwebtoken)
     const refreshToken = jwt.sign(
       { username: mockUser.username },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: '7d' }
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRATION }
     );
     // 6. Envoi des tokens dans la réponse
     return NextResponse.json({

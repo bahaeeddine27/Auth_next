@@ -14,13 +14,13 @@ export async function POST(request) {
   }
   try {
     // 3. Vérifier le refresh token
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     // 4. Générer un nouveau token d'accès
     const newAccessToken = jwt.sign(
       { username: decoded.username },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '15m' }
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRATION }
     );
     // 5. Renvoyer le nouveau token en réponse
     return NextResponse.json({ accessToken: newAccessToken });
