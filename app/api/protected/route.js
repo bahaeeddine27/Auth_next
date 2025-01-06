@@ -6,13 +6,13 @@ export async function GET(request) {
   const authHeader = request.headers.get('Authorization');
 
   // 2. Extraire le token du "Authorization" header
-  if (!authHeader) {
-    // Si l'en-tête est absent, renvoyer une erreur 401
-    return NextResponse.json(
-      { message: 'Token is required' },
-      { status: 401 }
-    );
-  }
+  // if (!authHeader) {
+  //   // Si l'en-tête est absent, renvoyer une erreur 401
+  //   return NextResponse.json(
+  //     { message: 'Token is required' },
+  //     { status: 401 }
+  //   );
+  // }
 
   const token = authHeader.split(' ')[1]; // Le token se trouve après "Bearer"
 
