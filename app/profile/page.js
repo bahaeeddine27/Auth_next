@@ -11,85 +11,93 @@ export default function ProfilePage() {
   // 3. Définir le "router"
   const router = useRouter();
 
+  const handleLogout = () => {
+    // Supprimer le "token" et le "refreshToken" du localStorage
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    // Rediriger vers la page "/login"
+    router.push('/login');
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
-      try {    
+      try {
         // 4. Récupérer le "token" et le "refreshToken" du localStorage
         const token = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
-        // 5. Faire la requête vers "/api/protected"
+
+        // 5. Vérifier si le token est présent
+        if (!token) {
+          handleLogout();
+          return;
+        }
+
+        // 6. Faire la requête vers "/api/protected"
         const response = await fetch('/api/protected', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
-        // 6. Si la réponse n'est pas bonne, a un status 401, que "isRefreshing" est "false" et qu'on a bien un "refreshToken"
-        if (response.status === 401 && refreshToken) {
-          // 7. Passer isRefreshing à "true"
+
+        // 7. Si la réponse a un status 401, qu'on a un "refreshToken" et qu'on n'est pas déjà en train de rafraîchir
+        if (response.status === 401 && refreshToken && !isRefreshing) {
+          // 8. Passer isRefreshing à "true"
           setIsRefreshing(true);
-          // 8. Faire la requête vers "'/api/refresh"
+
+          // 9. Faire la requête vers "/api/refresh"
           const refreshResponse = await fetch('/api/refresh', {
             method: 'POST',
-            header: {
-              'Content-Type': 'application/json', 
+            headers: {
+              'Content-Type': 'application/json',
             },
-            body :JSON.stringify({ refreshToken }),
+            body: JSON.stringify({ refreshToken }),
           });
-          // 9. Si la réponse est bonne
-          if (refreshToken.ok) {
-            // 10. Récupérer le token dans la réponse
+
+          // 10. Si la réponse est bonne
+          if (refreshResponse.ok) {
+            // 11. Récupérer le nouveau token dans la réponse
             const data = await refreshResponse.json();
             const { accessToken } = data;
-            // 11. Stocker ce token dans le localStorage
+
+            // 12. Stocker ce token dans le localStorage
             localStorage.setItem('accessToken', accessToken);
-            // 12. Passer isRefreshing à "false"
+
+            // 13. Passer isRefreshing à "false"
             setIsRefreshing(false);
-            // 13. Appeler la fonction "fetchProfile"
+
+            // 14. Appeler à nouveau "fetchProfile"
             fetchProfile();
           } else {
-            // 14. Passer isRefreshing à "false"
+            // 15. Passer isRefreshing à "false" et déconnecter l'utilisateur
             setIsRefreshing(false);
-            // 15. Déconnecter l'utilisateur
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            router.push('/login');
+            handleLogout();
           }
         } else if (response.ok) {
           // 16. Récupérer les données de la réponse
           const data = await response.json();
-          // 17. Utiliser "setUser" pour mettre à jour l'utilisateur avec les données récupérées.
+
+          // 17. Mettre à jour l'utilisateur avec "setUser"
           setUser(data);
+        } else {
+          // 18. Déconnecter l'utilisateur en cas d'autre erreur
+          handleLogout();
         }
       } catch (error) {
-        // 18. Rediriger vers la page "/login"
-        router.push('/login'); 
+        // 19. Déconnecter l'utilisateur en cas d'erreur
+        handleLogout();
       }
     };
 
-    // 19. Récupérer le "token"
-    if (!token) {
-      // 20. Rediriger vers la page "/login"
-      router.push('/login');
-    } else {
-      // 21. Appeler la fonction "fetchProfile
-      fetchProfile();
-    }
-  }, [router]);
-
-  const handleLogout = () => {
-    // 22. Supprimer le "token" et le "refreshToken" du localStorage
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    // 23. Rediriger vers la page "/login"
-    router.push('/login');
-  };
+    // 20. Appeler la fonction "fetchProfile"
+    fetchProfile();
+  }, [router, isRefreshing]);
 
   return (
     <div>
       <h1>Profile Page</h1>
       {isRefreshing ? (
-        <p>Refreshing tokenn...</p>
+        <p>Refreshing token...</p>
       ) : user ? (
         <p>Welcome, {user.username}!</p>
       ) : (
