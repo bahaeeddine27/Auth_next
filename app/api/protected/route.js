@@ -2,26 +2,28 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
 export async function GET(request) {
-  // 1. Récupérer "authorization" dans les "headers" et le stocker dans un variable "authHeader"
+  // 1. Extraire le "Authorization" header dans une variable "authHeader"
   const authHeader = request.headers.get('Authorization');
 
-  // 2. Récupérer le token dans le "authHeader"
+  // 2. Extraire le token du "Authorization" header
   if (!authHeader) {
-    // 3. S'il n'y a pas de token alors renvoyer une erreur
+    // Si l'en-tête est absent, renvoyer une erreur 401
     return NextResponse.json(
       { message: 'Token is required' },
       { status: 401 }
     );
   }
-  const token = authHeader.split(' ')[1];
+
+  const token = authHeader.split(' ')[1]; // Le token se trouve après "Bearer"
 
   try {
-    // 4. Vérifier le JWT
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // 5. Renvoyer la réponse avec le "decoded"
+    // 3. Vérifier le JWT avec la clé secrète pour l'access token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Utilisation de la clé secrète pour l'access token
+
+    // 4. Renvoyer la réponse avec les données décodées
     return NextResponse.json({ decoded });
   } catch (error) {
-    // 6. Renvoyer une erreur
+    // 5. Renvoyer une erreur si le token est invalide ou expiré
     return NextResponse.json(
       { message: 'Invalid or expired token' },
       { status: 403 }
