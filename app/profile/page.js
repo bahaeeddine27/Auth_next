@@ -78,7 +78,7 @@ export default function ProfilePage() {
           const data = await response.json();
 
           // 17. Mettre à jour l'utilisateur avec "setUser"
-          setUser(data);
+          setUser(data.user);
         }
       } catch (error) {
         // 19. Déconnecter l'utilisateur en cas d'erreur

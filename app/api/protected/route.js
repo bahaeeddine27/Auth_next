@@ -29,7 +29,7 @@ export async function GET(request) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Utilisation de la clé secrète pour l'access token
 
     // 4. Renvoyer la réponse avec les données décodées
-    return NextResponse.json({ decoded });
+    return NextResponse.json({ user: decoded });
   } catch (error) {
     // 5. Renvoyer une erreur si le token est invalide ou expiré
     return NextResponse.json(
