@@ -41,7 +41,7 @@ export default function ProfilePage() {
         });
 
         // 7. Si la réponse a un status 401, qu'on a un "refreshToken" et qu'on n'est pas déjà en train de rafraîchir
-        if (response.status === 401 && refreshToken && !isRefreshing) {
+        if (!response.ok && response.status === 403 && refreshToken && !isRefreshing) {
           // 8. Passer isRefreshing à "true"
           setIsRefreshing(true);
 
@@ -79,9 +79,6 @@ export default function ProfilePage() {
 
           // 17. Mettre à jour l'utilisateur avec "setUser"
           setUser(data);
-        } else {
-          // 18. Déconnecter l'utilisateur en cas d'autre erreur
-          handleLogout();
         }
       } catch (error) {
         // 19. Déconnecter l'utilisateur en cas d'erreur
@@ -91,7 +88,7 @@ export default function ProfilePage() {
 
     // 20. Appeler la fonction "fetchProfile"
     fetchProfile();
-  }, [router, isRefreshing]);
+  }, []);
 
   return (
     <div>
